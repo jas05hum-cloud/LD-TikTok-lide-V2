@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>L&D TikTok Slide</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* PHONE SHELL */
+    .phone {
+      position: relative;
+      width: 380px;
+      height: 820px;
+      border-radius: 48px;
+      border: 6px solid #444;
+      background: #000;
+      box-shadow: 0 0 40px rgba(0,0,0,0.9);
+      overflow: hidden;
+    }
+
+    /* top bar fake notch area */
+    .phone::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40%;
+      height: 18px;
+      border-radius: 12px;
+      background: #111;
+    }
+
+    .screen {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 40px);
+      overflow: hidden;
+    }
+
+    .feed {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.45s ease-out;
+    }
+
+    .slide {
+      height: 100%;
+      flex-shrink: 0;
+      position: relative;
+      padding: 18px 16px 80px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      opacity: 0.9;
+    }
+
+    .video {
+      flex: 1;
+      border-radius: 18px;
+      margin-bottom: 14px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 80px;
+      color: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: transform 0.25s, box-shadow 0.25s, opacity 0.25s;
+    }
+
+    .video:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 22px rgba(0,0,0,0.6);
+    }
+
+    .video::before {
+      content: "▶";
+      position: absolute;
+    }
+
+    .caption {
+      font-size: 16px;
+      line-height: 1.45;
+      opacity: 0;                 /* hidden until play */
+      transform: translateY(10px);
+      transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+    }
+
+    .caption h2 {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    /* when slide is “playing”, reveal caption */
+    .slide.playing .caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Likes / actions on right side */
+    .actions {
+      position: absolute;
+      right: 14px;
+      bottom: 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .heart {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+      font-size: 22px;
+    }
+
+    .heart span {
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .heart:hover {
+      transform: scale(1.12);
+    }
+
+    .heart.liked {
+      color: #ff0050;
+      animation: pop 0.35s;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.35); }
+      100% { transform: scale(1.05); }
+    }
+
+    /* CONTROLS UNDER PHONE */
+    .controls {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .controls button {
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 14px;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .controls button:hover {
+      background: #333;
+      transform: translateY(-1px);
+    }
+
+    .hint {
+      margin-top: 6px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Background gradients for each “video” */
+    .bg-hook {
+      background: radial-gradient(circle at top, #3949ab, #1a237e);
+    }
+    .bg-visuals {
+      background: radial-gradient(circle at top, #ff6f61, #b71c1c);
+    }
+    .bg-audio {
+      background: radial-gradient(circle at top, #00bcd4, #006064);
+    }
+
+    /* small screens tweak */
+    @media (max-width: 480px) {
+      .phone {
+        transform: scale(0.9);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="feed" id="feed">
+
+        <!-- SLIDE 1 – HOOK -->
+        <section class="slide">
+          <div class="header">For You</div>
+          <div class="video bg-hook" data-label="Hook"></div>
+          <div class="actions">
+            <div class="heart">
+              ♥
+              <span>24.8K</span>
+            </div>
+          </div>
+          <div class="caption">
+            <h2>Hook</h2>
+            <p>A strong hook grabs attention in the first 3–5 seconds.</p>
+          </div>
+        </section>
+
+        <!-- SLIDE 2 – VISUALS -->
+        <section class="slide">
+          <div class="header">For You</div>
+          <div class="video bg-visuals" data-label="Visuals"></div>
+          <div class="actions">
+            <div class="heart">
+              ♥
+              <span>31.2K</span>
+            </div>
+          </div>
+          <div class="caption">
+            <h2>Strong Visuals</h2>
+            <p>Use clean, bold visuals to keep learners engaged.</p>
+          </div>
+        </section>
+
+        <!-- SLIDE 3 – AUDIO -->
+        <section class="slide">
+          <div class="header">For You</div>
+          <div class="video bg-audio" data-label="Audio"></div>
+          <div class="actions">
+            <div class="heart">
+              ♥
+              <span>19.7K</span>
+            </div>
+          </div>
+          <div class="caption">
+            <h2>Engaging Audio</h2>
+            <p>Clear, crisp audio keeps people from scrolling away.</p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="upBtn">↑ Slide</button>
+    <button id="downBtn">↓ Slide</button>
+  </div>
+  <div class="hint">
+    Use ↑ / ↓ or tap the buttons. Click the “video” to reveal the tip.
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const feed   = document.getElementById("feed");
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const videos = document.querySelectorAll(".video");
+      const hearts = document.querySelectorAll(".heart");
+      const upBtn   = document.getElementById("upBtn");
+      const downBtn = document.getElementById("downBtn");
+
+      let current = 0;
+
+      function goToSlide(n) {
+        // clamp between 0 and slides.length - 1
+        current = Math.max(0, Math.min(n, slides.length - 1));
+        feed.style.transform = `translateY(-${current * 100}%)`;
+      }
+
+      // BUTTONS
+      upBtn.onclick   = () => goToSlide(current - 1);
+      downBtn.onclick = () => goToSlide(current + 1);
+
+      // ARROW KEYS
+      document.addEventListener("keydown", e => {
+        if (e.key === "ArrowUp")   { goToSlide(current - 1); }
+        if (e.key === "ArrowDown") { goToSlide(current + 1); }
+      });
+
+      // SWIPE (on phone only area)
+      let startY = null;
+      const screen = document.querySelector(".screen");
+
+      screen.addEventListener("touchstart", e => {
+        startY = e.touches[0].clientY;
+      });
+
+      screen.addEventListener("touchend", e => {
+        if (startY === null) return;
+        const endY = e.changedTouches[0].clientY;
+        const diff = startY - endY;
+        if (Math.abs(diff) > 60) {
+          if (diff > 0) goToSlide(current + 1); // swipe up
+          else          goToSlide(current - 1); // swipe down
+        }
+        startY = null;
+      });
+
+      // LIKE HEART
+      hearts.forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (btn.classList.contains("liked")) return;
+          btn.classList.add("liked");
+          const span = btn.querySelector("span");
+          let val = parseFloat(span.textContent.replace("K",""));
+          val += 0.1;
+          span.textContent = val.toFixed(1) + "K";
+        });
+      });
+
+      // PLAY / REVEAL CAPTION
+      videos.forEach((box, index) => {
+        box.addEventListener("click", () => {
+          slides[index].classList.add("playing");
+          box.style.opacity = "0.25"; // subtle “playing” effect
+        });
+      });
+
+      // start on first slide
+      goToSlide(0);
+    });
+  </script>
+</body>
+</html>
